@@ -154,12 +154,13 @@ def outRes2(x, y, songIds, toUse = [], average = True) :
 #         print(songIds[i])
 #         print(genreDict[songIds[i]])
         topThreePredictions[songIds[i]] = []
+        scoresCopy = scores.copy()
         for k in range(0, 3):
             max1 = float("-inf")
-            for j in range(len(scores)):
-                if scores[j] > max1:
-                    max1 = scores[j]
-            scores.remove(max1)
+            for j in range(len(scoresCopy)):
+                if scoresCopy[j] > max1:
+                    max1 = scoresCopy[j]
+            scoresCopy.remove(max1)
             topThreePredictions[songIds[i]].append((max1, scoresDict[max1]))
         
 #         if(scoresDict[maxScore]!=genreDict[songname]): 
@@ -203,7 +204,7 @@ for train_index, test_index in kf.split(allFeaturesMatrix):
     print("SONG ID")
     print(songIds[1])
     songIdsTest = [songIds[j] for j in test_index]
-    
+    print(len(genreStrings))
     #     X_train, X_test = allFeaturesMatrix[train_index], allFeaturesMatrix[test_index]
     for i in range(1, len(genreStrings)): 
         mdl = LogisticRegression() 
@@ -233,6 +234,7 @@ for train_index, test_index in kf.split(allFeaturesMatrix):
         genreToModel[genreStrings[i]] = fittedmdl 
         numIncorrectClass = 0 
     print("done with one fold")
+    # print(genreToModel)
     totalClassified = 0 
     # print(X_test)
     # numInc, totalUpdate = outRes2(X_test, y_test)
