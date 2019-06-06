@@ -1,5 +1,4 @@
 from sklearn.neighbors import NearestNeighbors, DistanceMetric
-from sklearn.mixture import GaussianMixture
 import numpy as np
 import csv
 import collections
@@ -107,28 +106,6 @@ def outputResults(toUse = []) :
             print "\t\t" + allFeaturesMatrix[line[1]][2] + " by " + allFeaturesMatrix[line[1]][1]
         print "\n"
 
-def gausMixOutput(toUse = []) : 
-    print "Learning done... Now finding results!\n\n"
-    for person, songIds in friends.items() : 
-        songs = []
-        for song in songIds : 
-            #Using all songs
-            info = allFeaturesDict[song]
-            if not toUse : songs.append(info[4:])
-            else : songs.append([info[i] for i in range(len(info)) if i in toUse])
-        print "Songs for my friend " + person
-        print "\t Input songs: "
-        for song in songIds : 
-            print "\t\t" + allFeaturesDict[song][2] + " by " + allFeaturesDict[song][1]
-        print "\t EM algorithm result: "
-        #result = gaus.predict(songs.reshape(1,-1))
-        gaus.set_params(gaus.get_params(songs))
-        result = gaus.sample(5)
-        for line in result : 
-            print line
-            #print "\t\t" + allFeaturesMatrix[line[1]][2] + " by " + allFeaturesMatrix[line[1]][1]
-        print "\n"
-
 #################
 #     TESTS     #
 #################
@@ -154,17 +131,6 @@ nbors = NearestNeighbors(n_neighbors=5, metric='euclidean').fit(numericalFeature
 print "Learning done... Now finding results!\n\n"
 outputResults(desiredFeatures)
 
-#Gaussian mixture
-print "Currently learning and fitting data for Gaussian Mixture!\n"
-#interestingly, same results using kd_tree and ball_tree
-#gaus = GaussianMixture(n_components=5).fit(numericalFeatures)
-#gausMixOutput(desiredFeatures)
-
-##### Comments #####
-#Used Euclidean, Manhattan and Chebyshev (and more) distance metrics.
-#Different distances provided very minor changes (never more than 2 songs from other distance metrics).
-#
-#
 
 
 
