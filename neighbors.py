@@ -1,7 +1,9 @@
-from sklearn.neighbors import NearestNeighbors
+from sklearn.neighbors import NearestNeighbors, DistanceMetric
+from sklearn.mixture import GaussianMixture
 import numpy as np
 import csv
 import collections
+import math
 
 keys = {'C': 0, 'C#': 1, 'D': 2, 'D#': 3, 'E': 4, 'F': 5, 
         'F#': 6, 'G': 7, 'G#': 8, 'A': 9, 'A#': 10, 'B': 11}
@@ -36,7 +38,11 @@ def readMusicData(filename) :
                     value = keys[value]
                 if currFeature == 12 : 
                     value = 1 if value == "Major" else 0
-                features.append(value)
+                if currFeature == 17 : 
+                    value = value.translate(None, '[,]')
+                    for genre in value.split(): 
+                        features.append(float(genre))
+                else : features.append(value)
                 currFeature += 1
             allFeaturesDict[nameID] = features
             allFeaturesMatrix.append(features)
@@ -73,7 +79,7 @@ def numericalFeaturesOnly(allFeatures, toUse = []) :
     return newFeatures
 
 
-def outputResults(toUse = [], average = True) :
+def outputResults(toUse = []) :
     for person, songIds in friends.items() : 
         songs = []
         for song in songIds : 
@@ -101,6 +107,28 @@ def outputResults(toUse = [], average = True) :
             print "\t\t" + allFeaturesMatrix[line[1]][2] + " by " + allFeaturesMatrix[line[1]][1]
         print "\n"
 
+def gausMixOutput(toUse = []) : 
+    print "Learning done... Now finding results!\n\n"
+    for person, songIds in friends.items() : 
+        songs = []
+        for song in songIds : 
+            #Using all songs
+            info = allFeaturesDict[song]
+            if not toUse : songs.append(info[4:])
+            else : songs.append([info[i] for i in range(len(info)) if i in toUse])
+        print "Songs for my friend " + person
+        print "\t Input songs: "
+        for song in songIds : 
+            print "\t\t" + allFeaturesDict[song][2] + " by " + allFeaturesDict[song][1]
+        print "\t EM algorithm result: "
+        #result = gaus.predict(songs.reshape(1,-1))
+        gaus.set_params(gaus.get_params(songs))
+        result = gaus.sample(5)
+        for line in result : 
+            print line
+            #print "\t\t" + allFeaturesMatrix[line[1]][2] + " by " + allFeaturesMatrix[line[1]][1]
+        print "\n"
+
 #################
 #     TESTS     #
 #################
@@ -108,22 +136,35 @@ print "Reading File Data!\n"
 # Our friend song interests. 
 friends = requests('SongInput.txt')
 #populate matrix and dict with all features
-readMusicData('SpotifyFeatures.csv')
+readMusicData('25genres.csv')
 #Feature indices, beginning at 4 and ending at 16, inclusive. BTW, 12 features total. 
 #first example: all features
 # desiredFeatures = [i for i in range(4,17)]
 #second example: "Danceability, Speechiness, Acousticness, Instrumentalness, Liveness, Valence, Loudness, and Tempo"
 desiredFeatures = [4,5,8,10,11,13,14,16]
+for i in range(17,17+25) : desiredFeatures.append(i)
 #just the numerical features sans artist/titles/genre/id
 numericalFeatures = numericalFeaturesOnly(allFeaturesMatrix, desiredFeatures)
 
 #nearest neighbors
-#do not use energy feature!
-print "Currently learning and fitting data!\n"
-nbors = NearestNeighbors(5).fit(numericalFeatures)
+print "Currently learning and fitting data for k-Nearest Neighbors!\n"
+#interestingly, same results using kd_tree and ball_tree
+nbors = NearestNeighbors(n_neighbors=5, metric='euclidean').fit(numericalFeatures)
 
 print "Learning done... Now finding results!\n\n"
 outputResults(desiredFeatures)
+
+#Gaussian mixture
+print "Currently learning and fitting data for Gaussian Mixture!\n"
+#interestingly, same results using kd_tree and ball_tree
+#gaus = GaussianMixture(n_components=5).fit(numericalFeatures)
+#gausMixOutput(desiredFeatures)
+
+##### Comments #####
+#Used Euclidean, Manhattan and Chebyshev (and more) distance metrics.
+#Different distances provided very minor changes (never more than 2 songs from other distance metrics).
+#
+#
 
 
 
