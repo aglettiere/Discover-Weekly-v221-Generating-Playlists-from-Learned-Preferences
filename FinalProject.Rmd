@@ -139,7 +139,7 @@ ci.bootstrap.t =round(theta.hat-c((t1), (t2))*se.theta.hat, digits = 4)
 ci.bootstrap.t
 
 
-bootk = 26 
+bootk = 25 
 km3 = kmeans(reducedFeatures, bootk, iter.max = 10000, algorithm="MacQueen")
 pvalue3 = sigclust(reducedFeatures, nsim = 10, k = bootk)
 pvalue3
@@ -167,7 +167,7 @@ pk1$nc
 ```
 
 ```{r, warning=FALSE}
-kValue = 26
+kValue = 25
 km = kmeans(reducedFeatures, kValue, iter.max = 10000, algorithm="MacQueen")
 fviz_cluster(km, data = reducedFeatures)
 
